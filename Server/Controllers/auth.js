@@ -1,10 +1,11 @@
 require("../Models/usersSchema")
+const bcrypt = require('bcryptjs')
 const mongoose = require("mongoose")
 const User = mongoose.model("User")
+
 exports.signUp = async (req, res) =>{
-    // console.log("controller requested body",req.body)
+    console.log("controller requested body",req.body)
     const {firstName,lastName,email,password} = req.body
-    const encryptPassword = await bycript.hash(password,20)
     try {
        const emailExists = await User.findOne({email})
        console.log("email exisst",emailExists)
@@ -13,9 +14,11 @@ exports.signUp = async (req, res) =>{
             error:"Email Id already exists"
         })
        }
+       const salt = await bcrypt.genSalt(10)
+       let hashed_Password = await bcrypt.hash(password,salt)
         
         await User.create({
-            firstName,lastName,email,password:encryptPassword
+            firstName,lastName,email,password:hashed_Password
           })
           res.send({
             status:"user saved"
